@@ -26,7 +26,7 @@ describe Octokitted do
       expect(gh.instance_variable_get(:@token)).to eq("faketoken")
       expect(gh.instance_variable_get(:@log)).to eq(logger)
       expect(gh.instance_variable_get(:@org_and_repo)).to eq("github/octocat")
-      expect(gh.client).to be_a(Octokit::Client)
+      expect(gh.octokit).to be_a(Octokit::Client)
     end
 
     it "sets up the class and builds a logger as well" do
