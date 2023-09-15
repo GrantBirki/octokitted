@@ -23,6 +23,8 @@ class Octokitted
     @log = logger || setup_logger
     @org_and_repo = org_and_repo_hash[:org_and_repo]
 
+    @login = @client.login if @login.nil? # reset the login to the owner of the token if not provided
+
     @log.debug("Octokitted initialized")
     @log.debug("login: #{@client.login}")
     @log.debug("org: #{@org}")
