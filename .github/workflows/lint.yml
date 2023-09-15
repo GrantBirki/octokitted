@@ -1,0 +1,26 @@
+name: lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.0.0
+
+      - uses: ruby/setup-ruby@5311f05890856149502132d25c4a24985a00d426 # pin@v1.153.0
+        with:
+          bundler-cache: true
+
+      - name: lint
+        run: bundle exec rubocop -c .rubocop.yml lib/ spec/
