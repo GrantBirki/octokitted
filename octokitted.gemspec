@@ -21,6 +21,8 @@ Gem::Specification.new do |spec|
     "bug_tracker_uri" => "https://github.com/grantbirki/octokitted/issues"
   }
 
+  spec.add_dependency "contracts", "~> 0.17"
+  spec.add_dependency "faraday-retry", "~> 2.2"
   spec.add_dependency "git", "~> 1.18"
   spec.add_dependency "octokit", "~> 7.1"
 
