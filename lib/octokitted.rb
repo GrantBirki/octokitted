@@ -5,7 +5,7 @@ require "logger"
 
 class Octokitted
   # A Octokitted class to interact with the GitHub API
-  attr_reader :login, :org, :repo, :org_and_repo, :client
+  attr_reader :login, :org, :repo, :org_and_repo, :octokit
 
   # Initialize the class
   # :param login: The login to use for GitHubAPI interactions (defaults to the owner of the token)
@@ -19,14 +19,14 @@ class Octokitted
     @org = org || org_and_repo_hash[:org]
     @repo = repo || org_and_repo_hash[:repo]
     @token = token || fetch_token
-    @client = setup_client
+    @octokit = setup_octokit_client
     @log = logger || setup_logger
     @org_and_repo = org_and_repo_hash[:org_and_repo]
 
-    @login = @client.login if @login.nil? # reset the login to the owner of the token if not provided
+    @login = @octokit.login if @login.nil? # reset the login to the owner of the token if not provided
 
     @log.debug("Octokitted initialized")
-    @log.debug("login: #{@client.login}")
+    @log.debug("login: #{@octokit.login}")
     @log.debug("org: #{@org}")
     @log.debug("repo: #{@repo}")
   end
@@ -88,7 +88,7 @@ class Octokitted
 
   # Setup an Octokit client
   # :return: An Octokit client
-  def setup_client
+  def setup_octokit_client
     Octokit::Client.new(
       access_token: @token,
       login: @login,
