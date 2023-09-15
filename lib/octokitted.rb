@@ -9,8 +9,6 @@ class Octokitted
   # A Octokitted class to interact with the GitHub API
   attr_reader :login, :org, :repo, :org_and_repo, :octokit, :cloned_repos
 
-  include GitPlugin
-
   # Initialize the class
   # :param login: The login to use for GitHubAPI interactions (defaults to the owner of the token)
   # :param org: The org to use with the Octokitted class
@@ -29,6 +27,7 @@ class Octokitted
     @org_and_repo = org_and_repo_hash[:org_and_repo]
     @login = @octokit.login if @login.nil? # reset the login to the owner of the token if not provided
 
+    # setup the git plugin
     @git = GitPlugin.new(logger: @log, login: @login, token: @token)
 
     @log.debug("Octokitted initialized")

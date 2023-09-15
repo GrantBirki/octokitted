@@ -3,6 +3,8 @@
 require "git"
 
 class GitPlugin
+  attr_reader :login
+
   # Initialize the class
   def initialize(logger:, login:, token:)
     @log = logger
