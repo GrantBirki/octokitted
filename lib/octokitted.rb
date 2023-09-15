@@ -3,9 +3,13 @@
 require "octokit"
 require "logger"
 
+require_relative "octokitted/git_plugin"
+
 class Octokitted
   # A Octokitted class to interact with the GitHub API
-  attr_reader :login, :org, :repo, :org_and_repo, :octokit
+  attr_reader :login, :org, :repo, :org_and_repo, :octokit, :cloned_repos
+
+  include GitPlugin
 
   # Initialize the class
   # :param login: The login to use for GitHubAPI interactions (defaults to the owner of the token)
@@ -14,6 +18,7 @@ class Octokitted
   # :param token: The token to use to authenticate with the GitHub API
   # :param logger: The logger to use for logging
   def initialize(login: nil, org: nil, repo: nil, token: nil, logger: nil)
+    @cloned_repos = []
     org_and_repo_hash = fetch_org_and_repo
     @login = login
     @org = org || org_and_repo_hash[:org]
@@ -22,8 +27,9 @@ class Octokitted
     @octokit = setup_octokit_client
     @log = logger || setup_logger
     @org_and_repo = org_and_repo_hash[:org_and_repo]
-
     @login = @octokit.login if @login.nil? # reset the login to the owner of the token if not provided
+
+    @git = GitPlugin.new(logger: @log, login: @login, token: @token)
 
     @log.debug("Octokitted initialized")
     @log.debug("login: #{@octokit.login}")
@@ -49,6 +55,26 @@ class Octokitted
     @org = org
     @org_and_repo = "#{@org}/#{@repo}"
     @log.debug("updated org/repo: #{@org_and_repo}")
+  end
+
+  # Clone the currently set owner/repo repository
+  # :param path: The relative path to clone the repo to - (default: ".")
+  # :param options: The options to pass (default: {} - https://rubydoc.info/gems/git/Git#clone-class_method)
+  # :return: The Git object to operate with
+  def clone(path: ".", options: {})
+    result = @git.clone(org: @org, repo: @repo, path:, options:)
+    @cloned_repos << result[:path]
+    return result[:git_object]
+  end
+
+  def remove_clone!(path)
+    @git.remove_clone!(path)
+    @cloned_repos.delete(path)
+  end
+
+  def remove_all_clones!
+    @git.remove_all_clones!(@cloned_repos)
+    @cloned_repos = []
   end
 
   private
