@@ -13,7 +13,7 @@ class GitPlugin
   end
 
   # Removes / cleans up all repos that this class has cloned
-  # :param cloned_repos: The cloned repos to clean up
+  # :param cloned_repos: An array of paths to cloned repos to remove
   def remove_all_clones!(cloned_repos)
     @log.debug("removing all cloned repos")
     cloned_repos.each do |path|
@@ -23,7 +23,7 @@ class GitPlugin
   end
 
   # Removes a single cloned repo
-  # :param path: The path to the cloned repo to remove
+  # :param path: The path to the cloned repo to remove (String)
   def remove_clone!(path)
     @log.debug("removing cloned repo: #{path}")
     FileUtils.rm_r(path)
