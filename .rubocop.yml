@@ -16,3 +16,6 @@ AllCops:
 
 Style/HashSyntax:
   Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Max: 15
