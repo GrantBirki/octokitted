@@ -42,8 +42,9 @@ class Octokitted
 
   # Setter method for the repo instance variable
   # :param repo: The repo to set
-  # :return: the new org/repo
+  # :return: it does not return as it is a setter method
   # Example: gh.repo = "test"
+  Contract String => Any
   def repo=(repo)
     @repo = repo
     @org_and_repo = "#{@org}/#{@repo}"
@@ -52,8 +53,9 @@ class Octokitted
 
   # Setter method for the org instance variable
   # :param org: The org to set
-  # :return: the new org/repo
+  # :return: it does not return as it is a setter method
   # Example: gh.org = "test"
+  Contract String => Any
   def org=(org)
     @org = org
     @org_and_repo = "#{@org}/#{@repo}"
@@ -73,7 +75,8 @@ class Octokitted
 
   # Remove a cloned repository
   # :param path: The relative path to the cloned repo to remove (String)
-  Contract String => Any
+  # :return: true to indicate success
+  Contract String => true
   def remove_clone!(path)
     valid = false
 
@@ -90,12 +93,16 @@ class Octokitted
 
     @git.remove_clone!(path)
     @cloned_repos.delete(path)
+    true
   end
 
   # Remove all cloned repositories that have been cloned with this instance of Octokitted
+  # :return: true to indicate success
+  Contract None => true
   def remove_all_clones!
     @git.remove_all_clones!(@cloned_repos)
     @cloned_repos = []
+    true
   end
 
   private
@@ -121,7 +128,8 @@ class Octokitted
   end
 
   # fetch the GitHub token from the environment
-  # :return: The GitHub token
+  # :return: The GitHub token or nil if not found
+  Contract None => Maybe[String]
   def fetch_token
     # first try to use the OCTOKIT_ACCESS_TOKEN env var if it exists
     token = ENV.fetch("OCTOKIT_ACCESS_TOKEN", nil) # if running in actions
@@ -134,6 +142,7 @@ class Octokitted
     # if we get here, we don't have a token - this is okay because we can still do some things...
     # ... without a token, rate limiting can be an issue
     @log.warn("No GitHub token found")
+    return nil
   end
 
   # Setup an Octokit client
