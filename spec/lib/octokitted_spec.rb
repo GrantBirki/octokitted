@@ -21,6 +21,7 @@ describe Octokitted do
     allow(ENV).to receive(:fetch).with("OCTOKIT_ACCESS_TOKEN", nil).and_return(nil)
     allow(ENV).to receive(:fetch).with("GITHUB_REPOSITORY", nil).and_return("github/octocat")
     allow(ENV).to receive(:fetch).with("GITHUB_TOKEN", nil).and_return("faketoken")
+    allow(ENV).to receive(:fetch).with("GITHUB_SHA", nil).and_return("fakesha")
     allow(Issues).to receive(:new).and_return(double("Issues").as_null_object)
   end
 
@@ -39,6 +40,7 @@ describe Octokitted do
       expect(gh.octokit).to be_a(Octokit::Client)
       expect(gh.github_event).to be_a(Hash)
       expect(gh.github_event[:number]).to eq(91)
+      expect(gh.sha).to eq("fakesha")
     end
 
     it "sets up the class and builds a logger as well" do

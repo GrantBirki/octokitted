@@ -9,7 +9,17 @@ require_relative "octokitted/common/issues"
 
 class Octokitted
   # A Octokitted class to interact with the GitHub API
-  attr_reader :login, :org, :repo, :org_and_repo, :octokit, :cloned_repos, :log, :github_event, :issue_number, :issues
+  attr_reader :login,
+              :org,
+              :repo,
+              :org_and_repo,
+              :octokit,
+              :cloned_repos,
+              :log,
+              :github_event,
+              :sha,
+              :issue_number,
+              :issues
 
   include Contracts::Core
   include Contracts::Builtin
@@ -29,6 +39,7 @@ class Octokitted
     @log = logger || setup_logger
     @cloned_repos = []
     @event_path = event_path || ENV.fetch("GITHUB_EVENT_PATH", nil)
+    @sha = ENV.fetch("GITHUB_SHA", nil)
     org_and_repo_hash = fetch_org_and_repo
     @login = login
     @org = org || org_and_repo_hash[:org]
