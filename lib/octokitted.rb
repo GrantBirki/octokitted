@@ -67,6 +67,19 @@ class Octokitted
   end
 
   def remove_clone!(path)
+    valid = false
+
+    # check if the repo exists in the cloned_repos array
+    valid = true if @cloned_repos.include?(path)
+
+    # check if the repo exists in the cloned_repos array with a leading './'
+    if @cloned_repos.include?("./#{path}")
+      valid = true
+      path = "./#{path}" # update the path to include the relative path so the .delete method works
+    end
+
+    raise StandardError, "Not a cloned repository - path: #{path}" unless valid
+
     @git.remove_clone!(path)
     @cloned_repos.delete(path)
   end

@@ -81,6 +81,20 @@ describe Octokitted do
       )
     end
 
+    let(:git_leading_dot) do
+      double(
+        "GitPlugin",
+        clone: {
+          git_object: double(
+            "Git::Base"
+          ),
+          path: "./fake-repo"
+        },
+        remove_all_clones!: nil,
+        remove_clone!: nil
+      )
+    end
+
     it "successfully clones a repo" do
       expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git)
       gh = Octokitted.new(logger:, login:)
@@ -95,6 +109,26 @@ describe Octokitted do
       expect(gh.cloned_repos).to eq([])
       gh.clone
       expect(gh.cloned_repos).to eq(["fake-repo"])
+      gh.remove_clone!("fake-repo")
+      expect(gh.cloned_repos).to eq([])
+    end
+
+    it "successfully clones a repo and then deletes it with using a leading './'" do
+      expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git_leading_dot)
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.cloned_repos).to eq([])
+      gh.clone
+      expect(gh.cloned_repos).to eq(["./fake-repo"])
+      gh.remove_clone!("./fake-repo")
+      expect(gh.cloned_repos).to eq([])
+    end
+
+    it "successfully clones a repo and then deletes it with using a leading './' when not provided" do
+      expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git_leading_dot)
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.cloned_repos).to eq([])
+      gh.clone
+      expect(gh.cloned_repos).to eq(["./fake-repo"])
       gh.remove_clone!("fake-repo")
       expect(gh.cloned_repos).to eq([])
     end
@@ -123,6 +157,18 @@ describe Octokitted do
       expect(fake_git).to receive(:remove_all_clones!).and_return(nil)
       gh.remove_all_clones!
       expect(gh.cloned_repos).to eq([])
+    end
+
+    it "fails to delete a repo that wasn't cloned" do
+      expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git)
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.cloned_repos).to eq([])
+      gh.clone
+      expect(gh.cloned_repos).to eq(["fake-repo"])
+
+      expect { gh.remove_clone!("bad-repo") }.to raise_error(
+        StandardError, "Not a cloned repository - path: bad-repo"
+      )
     end
   end
 end
