@@ -24,7 +24,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "contracts", "~> 0.17"
   spec.add_dependency "faraday-retry", "~> 2.2"
   spec.add_dependency "git", "~> 1.18"
-  spec.add_dependency "git", "~> 1.18"
   spec.add_dependency "octokit", "~> 7.1"
 
   spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
