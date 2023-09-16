@@ -39,12 +39,12 @@ describe Octokitted do
       Octokitted.new(logger: nil, login:)
     end
 
-    it "fails if no GitHub token is found" do
+    it "logs a warning if no github token is found" do
       expect(ENV).to receive(:fetch).with("OCTOKIT_ACCESS_TOKEN", nil).and_return(nil)
       expect(ENV).to receive(:fetch).with("GITHUB_REPOSITORY", nil).and_return("github/octocat")
       expect(ENV).to receive(:fetch).with("GITHUB_TOKEN", nil).and_return(nil)
-      expect(logger).not_to receive(:debug).with("Octokitted initialized")
-      expect { Octokitted.new(logger:, login:) }.to raise_error("No GitHub token found")
+      expect(logger).to receive(:warn).with("No GitHub token found")
+      Octokitted.new(logger:, login:)
     end
   end
 
@@ -67,13 +67,13 @@ describe Octokitted do
   end
 
   context "#clone" do
+    let(:git_base) { Git::Base.new }
+
     let(:git) do
       double(
         "GitPlugin",
         clone: {
-          git_object: double(
-            "Git::Base"
-          ),
+          git_object: git_base,
           path: "fake-repo"
         },
         remove_all_clones!: nil,
@@ -85,9 +85,7 @@ describe Octokitted do
       double(
         "GitPlugin",
         clone: {
-          git_object: double(
-            "Git::Base"
-          ),
+          git_object: git_base,
           path: "./fake-repo"
         },
         remove_all_clones!: nil,
@@ -138,9 +136,9 @@ describe Octokitted do
       expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(fake_git)
       expect(fake_git).to receive(:clone)
         .and_return(
-          { git_object: double("Git::Base"), path: "fake-repo1" },
-          { git_object: double("Git::Base"), path: "fake-repo2" },
-          { git_object: double("Git::Base"), path: "fake-repo3" }
+          { git_object: git_base, path: "fake-repo1" },
+          { git_object: git_base, path: "fake-repo2" },
+          { git_object: git_base, path: "fake-repo3" }
         )
       gh = Octokitted.new(logger:, login:)
       gh.clone

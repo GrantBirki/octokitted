@@ -2,12 +2,16 @@
 
 require "octokit"
 require "logger"
+require "contracts"
 
 require_relative "octokitted/git_plugin"
 
 class Octokitted
   # A Octokitted class to interact with the GitHub API
   attr_reader :login, :org, :repo, :org_and_repo, :octokit, :cloned_repos
+
+  include Contracts::Core
+  include Contracts::Builtin
 
   # Initialize the class
   # :param login: The login to use for GitHubAPI interactions (defaults to the owner of the token)
@@ -16,6 +20,7 @@ class Octokitted
   # :param token: The token to use to authenticate with the GitHub API
   # :param logger: The logger to use for logging
   def initialize(login: nil, org: nil, repo: nil, token: nil, logger: nil)
+    @log = logger || setup_logger
     @cloned_repos = []
     org_and_repo_hash = fetch_org_and_repo
     @login = login
@@ -23,7 +28,6 @@ class Octokitted
     @repo = repo || org_and_repo_hash[:repo]
     @token = token || fetch_token
     @octokit = setup_octokit_client
-    @log = logger || setup_logger
     @org_and_repo = org_and_repo_hash[:org_and_repo]
     @login = @octokit.login if @login.nil? # reset the login to the owner of the token if not provided
 
@@ -60,12 +64,16 @@ class Octokitted
   # :param path: The relative path to clone the repo to - (default: ".")
   # :param options: The options to pass (default: {} - https://rubydoc.info/gems/git/Git#clone-class_method)
   # :return: The Git object to operate with
+  Contract Maybe[String], Maybe[Hash] => Git::Base
   def clone(path: ".", options: {})
     result = @git.clone(org: @org, repo: @repo, path:, options:)
     @cloned_repos << result[:path]
     return result[:git_object]
   end
 
+  # Remove a cloned repository
+  # :param path: The relative path to the cloned repo to remove (String)
+  Contract String => Any
   def remove_clone!(path)
     valid = false
 
@@ -84,6 +92,7 @@ class Octokitted
     @cloned_repos.delete(path)
   end
 
+  # Remove all cloned repositories that have been cloned with this instance of Octokitted
   def remove_all_clones!
     @git.remove_all_clones!(@cloned_repos)
     @cloned_repos = []
@@ -99,6 +108,7 @@ class Octokitted
 
   # Fetch the org and repo from the environment
   # :return: A hash containing the org and repo, and the org and repo separately
+  Contract None => HashOf[Symbol, String]
   def fetch_org_and_repo
     org_and_repo = ENV.fetch("GITHUB_REPOSITORY", nil)
     org = nil
@@ -121,7 +131,9 @@ class Octokitted
     token = ENV.fetch("GITHUB_TOKEN", nil) # if running in actions
     return token unless token.nil?
 
-    raise "No GitHub token found"
+    # if we get here, we don't have a token - this is okay because we can still do some things...
+    # ... without a token, rate limiting can be an issue
+    @log.warn("No GitHub token found")
   end
 
   # Setup an Octokit client
