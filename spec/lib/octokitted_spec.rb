@@ -3,6 +3,7 @@
 require "logger"
 require "spec_helper"
 require_relative "../../lib/octokitted"
+require_relative "../../lib/octokitted/git_plugin"
 
 describe Octokitted do
   before(:each) do
@@ -15,6 +16,7 @@ describe Octokitted do
 
   let(:login) { "hubot" }
   let(:logger) { double("Logger").as_null_object }
+  let(:token) { "faketoken" }
 
   context "#initialize" do
     it "ensures the class is initialized properly" do
@@ -23,7 +25,7 @@ describe Octokitted do
       expect(gh.instance_variable_get(:@login)).to eq("hubot")
       expect(gh.instance_variable_get(:@org)).to eq("github")
       expect(gh.instance_variable_get(:@repo)).to eq("octocat")
-      expect(gh.instance_variable_get(:@token)).to eq("faketoken")
+      expect(gh.instance_variable_get(:@token)).to eq(token)
       expect(gh.instance_variable_get(:@log)).to eq(logger)
       expect(gh.instance_variable_get(:@org_and_repo)).to eq("github/octocat")
       expect(gh.octokit).to be_a(Octokit::Client)
@@ -61,6 +63,66 @@ describe Octokitted do
       gh.org = "test"
       expect(gh.instance_variable_get(:@org)).to eq("test")
       expect(gh.instance_variable_get(:@org_and_repo)).to eq("test/octocat")
+    end
+  end
+
+  context "#clone" do
+    let(:git) do
+      double(
+        "GitPlugin",
+        clone: {
+          git_object: double(
+            "Git::Base"
+          ),
+          path: "fake-repo"
+        },
+        remove_all_clones!: nil,
+        remove_clone!: nil
+      )
+    end
+
+    it "successfully clones a repo" do
+      expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git)
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.cloned_repos).to eq([])
+      gh.clone
+      expect(gh.cloned_repos).to eq(["fake-repo"])
+    end
+
+    it "successfully clones a repo and then deletes it" do
+      expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git)
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.cloned_repos).to eq([])
+      gh.clone
+      expect(gh.cloned_repos).to eq(["fake-repo"])
+      gh.remove_clone!("fake-repo")
+      expect(gh.cloned_repos).to eq([])
+    end
+
+    it "successfully clones three repos and then deletes all clones" do
+      fake_git = double("GitPlugin")
+      expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(fake_git)
+      expect(fake_git).to receive(:clone)
+        .and_return(
+          { git_object: double("Git::Base"), path: "fake-repo1" },
+          { git_object: double("Git::Base"), path: "fake-repo2" },
+          { git_object: double("Git::Base"), path: "fake-repo3" }
+        )
+      gh = Octokitted.new(logger:, login:)
+      gh.clone
+      expect(gh.cloned_repos).to eq(["fake-repo1"])
+      gh.clone
+      expect(gh.cloned_repos).to eq(%w[fake-repo1 fake-repo2])
+      gh.clone
+      expect(gh.cloned_repos).to eq(%w[fake-repo1 fake-repo2 fake-repo3])
+
+      expect(fake_git).to receive(:remove_clone!).and_return(nil)
+      gh.remove_clone!("fake-repo2")
+      expect(gh.cloned_repos).to eq(%w[fake-repo1 fake-repo3])
+
+      expect(fake_git).to receive(:remove_all_clones!).and_return(nil)
+      gh.remove_all_clones!
+      expect(gh.cloned_repos).to eq([])
     end
   end
 end
