@@ -7,9 +7,10 @@ require_relative "../../lib/octokitted/git_plugin"
 require_relative "../../lib/octokitted/common/issues"
 
 describe Octokitted do
-  let(:event_path) { "spec/fixtures/github_events/commit_pushed_to_branch_with_pull_request.json" }
-  let(:default_event) { File.read("spec/fixtures/github_events/commit_pushed_to_branch_with_pull_request.json") }
+  let(:event_path) { "spec/fixtures/github_events/commit_on_pull_request.json" }
+  let(:default_event) { File.read("spec/fixtures/github_events/commit_on_pull_request.json") }
   let(:pull_request_opened_event) { File.read("spec/fixtures/github_events/pull_request_opened.json") }
+  let(:commit_pushed_event) { File.read("spec/fixtures/github_events/commit_pushed.json") }
   let(:login) { "hubot" }
   let(:logger) { double("Logger").as_null_object }
   let(:token) { "faketoken" }
@@ -34,7 +35,7 @@ describe Octokitted do
       expect(gh.instance_variable_get(:@token)).to eq(token)
       expect(gh.instance_variable_get(:@log)).to eq(logger)
       expect(gh.instance_variable_get(:@org_and_repo)).to eq("github/octocat")
-      expect(gh.instance_variable_get(:@issue_number)).to eq(nil)
+      expect(gh.instance_variable_get(:@issue_number)).to eq(91)
       expect(gh.octokit).to be_a(Octokit::Client)
     end
 
@@ -64,7 +65,7 @@ describe Octokitted do
     end
 
     it "sets up the class properly and does not auto-hydrate an issue_number" do
-      expect(File).to receive(:read).with(event_path).and_return(default_event)
+      expect(File).to receive(:read).with(event_path).and_return(commit_pushed_event)
       gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.instance_variable_get(:@issue_number)).to eq(nil)
     end
