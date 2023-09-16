@@ -55,4 +55,14 @@ describe Issues do
       issues.add_comment(comment: "foo")
     end
   end
+
+  context "#close_issue" do
+    it "closes an issue successfully" do
+      expect(octokitted).to receive(:org_and_repo).and_return(org_and_repo)
+      expect(octokit).to receive(:close_issue).with(org_and_repo, 1, {}).and_return(nil)
+      expect(logger).to receive(:debug).with("closing issue: 1")
+      issues = Issues.new(octokitted)
+      issues.close_issue(issue_number: 1)
+    end
+  end
 end
