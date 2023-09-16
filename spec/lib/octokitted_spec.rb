@@ -4,53 +4,85 @@ require "logger"
 require "spec_helper"
 require_relative "../../lib/octokitted"
 require_relative "../../lib/octokitted/git_plugin"
+require_relative "../../lib/octokitted/common/issues"
 
 describe Octokitted do
+  let(:event_path) { "spec/fixtures/github_events/commit_pushed_to_branch_with_pull_request.json" }
+  let(:default_event) { File.read("spec/fixtures/github_events/commit_pushed_to_branch_with_pull_request.json") }
+  let(:pull_request_opened_event) { File.read("spec/fixtures/github_events/pull_request_opened.json") }
+  let(:login) { "hubot" }
+  let(:logger) { double("Logger").as_null_object }
+  let(:token) { "faketoken" }
+
   before(:each) do
     allow(ENV).to receive(:fetch).with("OCTOKIT_PER_PAGE", 100).and_return(100)
     allow(ENV).to receive(:fetch).with("OCTOKIT_AUTO_PAGINATE", true).and_return(true)
     allow(ENV).to receive(:fetch).with("OCTOKIT_ACCESS_TOKEN", nil).and_return(nil)
     allow(ENV).to receive(:fetch).with("GITHUB_REPOSITORY", nil).and_return("github/octocat")
     allow(ENV).to receive(:fetch).with("GITHUB_TOKEN", nil).and_return("faketoken")
+    allow(Issues).to receive(:new).and_return(double("Issues").as_null_object)
   end
-
-  let(:login) { "hubot" }
-  let(:logger) { double("Logger").as_null_object }
-  let(:token) { "faketoken" }
 
   context "#initialize" do
     it "ensures the class is initialized properly" do
+      expect(File).to receive(:read).with(event_path).and_return(default_event)
       expect(logger).to receive(:debug).with("Octokitted initialized")
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.instance_variable_get(:@login)).to eq("hubot")
       expect(gh.instance_variable_get(:@org)).to eq("github")
       expect(gh.instance_variable_get(:@repo)).to eq("octocat")
       expect(gh.instance_variable_get(:@token)).to eq(token)
       expect(gh.instance_variable_get(:@log)).to eq(logger)
       expect(gh.instance_variable_get(:@org_and_repo)).to eq("github/octocat")
+      expect(gh.instance_variable_get(:@issue_number)).to eq(nil)
       expect(gh.octokit).to be_a(Octokit::Client)
     end
 
     it "sets up the class and builds a logger as well" do
+      expect(File).to receive(:read).with(event_path).and_return(default_event)
       allow(ENV).to receive(:fetch).with("LOG_LEVEL", "INFO").and_return("DEBUG")
       expect(Logger).to receive(:new).with($stdout, level: "DEBUG").and_return(logger)
       expect(logger).to receive(:debug).with("Octokitted initialized")
       expect(logger).to receive(:debug).with("login: hubot")
-      Octokitted.new(logger: nil, login:)
+      Octokitted.new(logger: nil, login:, event_path:)
     end
 
     it "logs a warning if no github token is found" do
+      expect(File).to receive(:read).with(event_path).and_return(default_event)
       expect(ENV).to receive(:fetch).with("OCTOKIT_ACCESS_TOKEN", nil).and_return(nil)
       expect(ENV).to receive(:fetch).with("GITHUB_REPOSITORY", nil).and_return("github/octocat")
       expect(ENV).to receive(:fetch).with("GITHUB_TOKEN", nil).and_return(nil)
       expect(logger).to receive(:warn).with("No GitHub token found")
-      Octokitted.new(logger:, login:)
+      Octokitted.new(logger:, login:, event_path:)
+    end
+
+    it "sets up the class properly and does not auto-hydrate an issue_number due to a missing env var" do
+      expect(ENV).to receive(:fetch).with("GITHUB_EVENT_PATH", nil).and_return(nil)
+      expect(logger).to receive(:warn).with("GITHUB_EVENT_PATH env var not found")
+      gh = Octokitted.new(logger:, login:, event_path: nil)
+      expect(gh.instance_variable_get(:@issue_number)).to eq(nil)
+    end
+
+    it "sets up the class properly and does not auto-hydrate an issue_number" do
+      expect(File).to receive(:read).with(event_path).and_return(default_event)
+      gh = Octokitted.new(logger:, login:, event_path:)
+      expect(gh.instance_variable_get(:@issue_number)).to eq(nil)
+    end
+
+    it "sets up the class properly and does auto-hydrate an issue_number" do
+      expect(File).to receive(:read).with("pull_request_opened.json").and_return(pull_request_opened_event)
+      gh = Octokitted.new(logger:, login:, event_path: "pull_request_opened.json")
+      expect(gh.instance_variable_get(:@issue_number)).to eq(91)
     end
   end
 
   context "#repo=" do
+    before(:each) do
+      expect(File).to receive(:read).with(event_path).and_return(default_event)
+    end
+
     it "sets the repo instance variable" do
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.instance_variable_get(:@repo)).to eq("octocat")
       gh.repo = "test"
       expect(gh.instance_variable_get(:@repo)).to eq("test")
@@ -58,7 +90,7 @@ describe Octokitted do
     end
 
     it "sets the org instance variable" do
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.instance_variable_get(:@org)).to eq("github")
       gh.org = "test"
       expect(gh.instance_variable_get(:@org)).to eq("test")
@@ -67,6 +99,10 @@ describe Octokitted do
   end
 
   context "#clone" do
+    before(:each) do
+      expect(File).to receive(:read).with(event_path).and_return(default_event)
+    end
+
     let(:git_base) { Git::Base.new }
 
     let(:git) do
@@ -95,7 +131,7 @@ describe Octokitted do
 
     it "successfully clones a repo" do
       expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git)
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.cloned_repos).to eq([])
       gh.clone
       expect(gh.cloned_repos).to eq(["fake-repo"])
@@ -103,7 +139,7 @@ describe Octokitted do
 
     it "successfully clones a repo and then deletes it" do
       expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git)
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.cloned_repos).to eq([])
       gh.clone
       expect(gh.cloned_repos).to eq(["fake-repo"])
@@ -113,7 +149,7 @@ describe Octokitted do
 
     it "successfully clones a repo and then deletes it with using a leading './'" do
       expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git_leading_dot)
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.cloned_repos).to eq([])
       gh.clone
       expect(gh.cloned_repos).to eq(["./fake-repo"])
@@ -123,7 +159,7 @@ describe Octokitted do
 
     it "successfully clones a repo and then deletes it with using a leading './' when not provided" do
       expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git_leading_dot)
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.cloned_repos).to eq([])
       gh.clone
       expect(gh.cloned_repos).to eq(["./fake-repo"])
@@ -140,7 +176,7 @@ describe Octokitted do
           { git_object: git_base, path: "fake-repo2" },
           { git_object: git_base, path: "fake-repo3" }
         )
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       gh.clone
       expect(gh.cloned_repos).to eq(["fake-repo1"])
       gh.clone
@@ -159,7 +195,7 @@ describe Octokitted do
 
     it "fails to delete a repo that wasn't cloned" do
       expect(GitPlugin).to receive(:new).with(logger:, login:, token:).and_return(git)
-      gh = Octokitted.new(logger:, login:)
+      gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.cloned_repos).to eq([])
       gh.clone
       expect(gh.cloned_repos).to eq(["fake-repo"])

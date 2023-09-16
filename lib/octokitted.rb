@@ -5,23 +5,30 @@ require "logger"
 require "contracts"
 
 require_relative "octokitted/git_plugin"
+require_relative "octokitted/common/issues"
 
 class Octokitted
   # A Octokitted class to interact with the GitHub API
-  attr_reader :login, :org, :repo, :org_and_repo, :octokit, :cloned_repos
+  attr_reader :login, :org, :repo, :org_and_repo, :octokit, :cloned_repos, :log, :github_event, :issue_number, :issues
 
   include Contracts::Core
   include Contracts::Builtin
 
   # Initialize the class
+  # :param event_path: The path to the GitHub event data (defaults to the GITHUB_EVENT_PATH env var)
   # :param login: The login to use for GitHubAPI interactions (defaults to the owner of the token)
   # :param org: The org to use with the Octokitted class
   # :param repo: The repo to interact with with the Octokitted class
+  # :param issue_number: The issue/pull_request number to interact with with the Octokitted class
   # :param token: The token to use to authenticate with the GitHub API
   # :param logger: The logger to use for logging
-  def initialize(login: nil, org: nil, repo: nil, token: nil, logger: nil)
+  #
+  # Note: If you do not provide an org, repo, token, or issue_number, Octokitted will attempt to self-hydrate...
+  # ... these values from the environment and the GitHub event data when you call `.new` on the class
+  def initialize(event_path: nil, login: nil, org: nil, repo: nil, issue_number: nil, token: nil, logger: nil)
     @log = logger || setup_logger
     @cloned_repos = []
+    @event_path = event_path || ENV.fetch("GITHUB_EVENT_PATH", nil)
     org_and_repo_hash = fetch_org_and_repo
     @login = login
     @org = org || org_and_repo_hash[:org]
@@ -29,10 +36,14 @@ class Octokitted
     @token = token || fetch_token
     @octokit = setup_octokit_client
     @org_and_repo = org_and_repo_hash[:org_and_repo]
+    @github_event = fetch_github_event(@event_path)
+    @issue_number = issue_number || fetch_issue_number(@github_event)
     @login = @octokit.login if @login.nil? # reset the login to the owner of the token if not provided
 
     # setup the git plugin
     @git = GitPlugin.new(logger: @log, login: @login, token: @token)
+    # setup the common Issues plugin
+    @issues = Issues.new(self)
 
     @log.debug("Octokitted initialized")
     @log.debug("login: #{@octokit.login}")
@@ -125,6 +136,38 @@ class Octokitted
     repo = org_and_repo.split("/").last unless org_and_repo.nil?
 
     return { org_and_repo:, org:, repo: }
+  end
+
+  # A helper method that attempts to self-hydrate context from the GitHub event data
+  # In Actions, the GITHUB_EVENT_PATH env var is set to a file containing the GitHub json event data
+  # If it exists, we try to load it into this class
+  # :param event_path: The path to the GitHub event data (defaults to the GITHUB_EVENT_PATH env var)
+  # :return: A Hash of the GitHub event data or nil if not found
+  Contract Maybe[String] => Maybe[Hash]
+  def fetch_github_event(event_path)
+    unless event_path
+      @log.warn("GITHUB_EVENT_PATH env var not found")
+      return nil
+    end
+
+    @log.info("GitHub Event data auto-hydrated")
+    return JSON.parse(File.read(event_path), symbolize_names: true)
+  end
+
+  # A helper method that attempts to self-hydrate the issue_number from the GitHub event data
+  # :param github_event: The GitHub event data (Hash)
+  # :return: The issue_number or nil if not found
+  Contract Maybe[Hash] => Maybe[Numeric]
+  def fetch_issue_number(github_event)
+    if github_event.nil?
+      @log.debug("GitHub event data not found - issue_number not auto-hydrated")
+      return nil
+    end
+
+    issue_number = (github_event[:issue] || github_event[:pull_request] || github_event)[:number]
+
+    @log.info("issue_number auto-hydrated - issue_number: #{issue_number}")
+    return issue_number
   end
 
   # fetch the GitHub token from the environment
