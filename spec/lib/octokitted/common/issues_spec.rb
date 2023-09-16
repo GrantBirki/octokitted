@@ -2,9 +2,9 @@
 
 require "logger"
 require "spec_helper"
-require_relative "../../../../lib/octokitted/common/issues"
+require_relative "../../../../lib/octokitted/common/issue"
 
-describe Issues do
+describe Issue do
   let(:logger) { double("Logger").as_null_object }
   let(:octokit) { double("Octokit") }
   let(:octokitted) { double("Octokitted", log: logger, octokit:, issue_number: 1) }
@@ -12,8 +12,8 @@ describe Issues do
 
   context "#initialize" do
     it "ensures the class is initialized properly" do
-      issues = Issues.new(octokitted)
-      expect(issues.instance_variable_get(:@log)).to eq(logger)
+      issue = Issue.new(octokitted)
+      expect(issue.instance_variable_get(:@log)).to eq(logger)
     end
   end
 
@@ -21,8 +21,8 @@ describe Issues do
     it "adds labels to an issue" do
       expect(octokitted).to receive(:org_and_repo).and_return(org_and_repo)
       expect(octokit).to receive(:add_labels_to_an_issue).with(org_and_repo, 1, %w[foo bar]).and_return(nil)
-      issues = Issues.new(octokitted)
-      issues.add_labels(labels: %w[foo bar])
+      issue = Issue.new(octokitted)
+      issue.add_labels(labels: %w[foo bar])
     end
   end
 
@@ -31,8 +31,8 @@ describe Issues do
       expect(octokitted).to receive(:org_and_repo).and_return(org_and_repo).twice
       expect(octokit).to receive(:remove_label).with(org_and_repo, 1, "foo").and_return(nil)
       expect(octokit).to receive(:remove_label).with(org_and_repo, 1, "bar").and_return(nil)
-      issues = Issues.new(octokitted)
-      issues.remove_labels(labels: %w[foo bar])
+      issue = Issue.new(octokitted)
+      issue.remove_labels(labels: %w[foo bar])
     end
 
     it "removes labels from an issue successfully but one label did not exist on the issue" do
@@ -40,9 +40,9 @@ describe Issues do
       expect(octokit).to receive(:remove_label).with(org_and_repo, 1, "foo").and_return(nil)
       expect(octokit).to receive(:remove_label).with(org_and_repo, 1, "bar").and_raise(Octokit::NotFound)
       expect(octokit).to receive(:remove_label).with(org_and_repo, 1, "baz").and_return(nil)
-      issues = Issues.new(octokitted)
+      issue = Issue.new(octokitted)
       expect(logger).to receive(:warn).with("label: bar not found on issue: 1")
-      issues.remove_labels(labels: %w[foo bar baz])
+      issue.remove_labels(labels: %w[foo bar baz])
     end
   end
 
@@ -51,8 +51,8 @@ describe Issues do
       expect(octokitted).to receive(:org_and_repo).and_return(org_and_repo)
       expect(octokit).to receive(:add_comment).with(org_and_repo, 1, "foo").and_return(nil)
       expect(logger).to receive(:debug).with("adding comment: foo to issue: 1")
-      issues = Issues.new(octokitted)
-      issues.add_comment(comment: "foo")
+      issue = Issue.new(octokitted)
+      issue.add_comment(comment: "foo")
     end
   end
 
@@ -61,8 +61,8 @@ describe Issues do
       expect(octokitted).to receive(:org_and_repo).and_return(org_and_repo)
       expect(octokit).to receive(:close_issue).with(org_and_repo, 1, {}).and_return(nil)
       expect(logger).to receive(:debug).with("closing issue: 1")
-      issues = Issues.new(octokitted)
-      issues.close_issue(issue_number: 1)
+      issue = Issue.new(octokitted)
+      issue.close(issue_number: 1)
     end
   end
 end

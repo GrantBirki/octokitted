@@ -4,7 +4,7 @@ require "logger"
 require "spec_helper"
 require_relative "../../lib/octokitted"
 require_relative "../../lib/octokitted/git_plugin"
-require_relative "../../lib/octokitted/common/issues"
+require_relative "../../lib/octokitted/common/issue"
 
 describe Octokitted do
   let(:event_path) { "spec/fixtures/github_events/commit_on_pull_request.json" }
@@ -22,7 +22,7 @@ describe Octokitted do
     allow(ENV).to receive(:fetch).with("GITHUB_REPOSITORY", nil).and_return("github/octocat")
     allow(ENV).to receive(:fetch).with("GITHUB_TOKEN", nil).and_return("faketoken")
     allow(ENV).to receive(:fetch).with("GITHUB_SHA", nil).and_return("fakesha")
-    allow(Issues).to receive(:new).and_return(double("Issues").as_null_object)
+    allow(Issue).to receive(:new).and_return(double("Issue").as_null_object)
   end
 
   context "#initialize" do

@@ -5,7 +5,7 @@ require "logger"
 require "contracts"
 
 require_relative "octokitted/git_plugin"
-require_relative "octokitted/common/issues"
+require_relative "octokitted/common/issue"
 
 class Octokitted
   # A Octokitted class to interact with the GitHub API
@@ -19,7 +19,7 @@ class Octokitted
               :github_event,
               :sha,
               :issue_number,
-              :issues
+              :issue
 
   include Contracts::Core
   include Contracts::Builtin
@@ -53,8 +53,8 @@ class Octokitted
 
     # setup the git plugin
     @git = GitPlugin.new(logger: @log, login: @login, token: @token)
-    # setup the common Issues plugin
-    @issues = Issues.new(self)
+    # setup the common Issue plugin
+    @issue = Issue.new(self)
 
     @log.debug("Octokitted initialized")
     @log.debug("login: #{@octokit.login}")

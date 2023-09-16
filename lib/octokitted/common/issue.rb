@@ -2,7 +2,7 @@
 
 require "contracts"
 
-class Issues
+class Issue
   include Contracts::Core
   include Contracts::Builtin
 
@@ -54,7 +54,7 @@ class Issues
   # Closes an issue
   # :param issue_number: The issue number to close
   Contract KeywordArgs[issue_number: Maybe[Numeric], options: Maybe[Hash]] => Any
-  def close_issue(issue_number: nil, options: {})
+  def close(issue_number: nil, options: {})
     issue_number = construct_issue_numer(issue_number)
     @log.debug("closing issue: #{issue_number}")
 
