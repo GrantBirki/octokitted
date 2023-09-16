@@ -30,6 +30,7 @@ class Issues
   # If the label does not exist, the exception is caught and logged
   # :param labels: The labels to remove from the issue (Array of strings)
   # :param issue_number: The issue number to remove labels from
+  Contract KeywordArgs[labels: ArrayOf[String], issue_number: Maybe[Numeric]] => Any
   def remove_labels(labels:, issue_number: nil)
     # if issue_number is nil, use the issue_number set in the parent class
     issue_number = @octokitted.issue_number if issue_number.nil?
@@ -41,5 +42,18 @@ class Issues
     rescue Octokit::NotFound
       @log.warn("label: #{label} not found on issue: #{issue_number}")
     end
+  end
+
+  # Adds a comment to an issue or pull request
+  # :param comment: The comment to add to the issue (String)
+  # :param issue_number: The issue number to add the comment to
+  Contract KeywordArgs[comment: String, issue_number: Maybe[Numeric]] => Any
+  def add_comment(comment:, issue_number: nil)
+    # if issue_number is nil, use the issue_number set in the parent class
+    issue_number = @octokitted.issue_number if issue_number.nil?
+
+    @log.debug("adding comment: #{comment} to issue: #{issue_number}")
+
+    @octokit.add_comment(@octokitted.org_and_repo, issue_number, comment)
   end
 end

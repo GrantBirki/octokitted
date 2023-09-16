@@ -45,4 +45,14 @@ describe Issues do
       issues.remove_labels(labels: %w[foo bar baz])
     end
   end
+
+  context "#add_comment" do
+    it "adds a comment to an issue successfully" do
+      expect(octokitted).to receive(:org_and_repo).and_return(org_and_repo)
+      expect(octokit).to receive(:add_comment).with(org_and_repo, 1, "foo").and_return(nil)
+      expect(logger).to receive(:debug).with("adding comment: foo to issue: 1")
+      issues = Issues.new(octokitted)
+      issues.add_comment(comment: "foo")
+    end
+  end
 end
