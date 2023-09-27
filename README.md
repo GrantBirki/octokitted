@@ -39,6 +39,23 @@ gem "octokitted", "~> X.X.X" # Replace X.X.X with the latest version
 
 This section goes over general usage of this Gem
 
+### Configuration
+
+The following table goes into detail about the configuration options that can be passed into the `Octokitted.new()` constructor:
+
+> It should be noted that when calling `Octokitted.new()` in the proper GitHub Action's context, no configuration is required to be passed into `.new()` because this Gem will fully self-hydrate itself. The `Required` field is only in the table below for reference if you are not running this Gem in GitHub Actions.
+
+| Option | Environment Variable | Description | Required |
+| ------ | -------------------- | ----------- | -------- |
+| `login` | - | The GitHub handle associated with the provided `token`. Defaults to the owner of the token | no |
+| `org` | `GITHUB_REPOSITORY` | The GitHub organization or user that owns a given repository. This value self-hydrates from the `GITHUB_REPOSITORY` env var when run in GitHub Actions | no, can be set after construction |
+| `repo` | `GITHUB_REPOSITORY` | The GitHub repository name. This value self-hydrates from the `GITHUB_REPOSITORY` env var when run in GitHub Actions | no, can be set after construction |
+| `issue_number` | `GITHUB_EVENT_PATH` | The GitHub issue number. This value self-hydrates from the `GITHUB_EVENT_PATH` env var when run in GitHub Actions. The event json object is read from disk on the Action's runner which contains issue number information | no, can be set after construction |
+| `token` | `GITHUB_TOKEN` or `OCTOKIT_ACCESS_TOKEN` | The GitHub token to use for authentication. This value self-hydrates from the `GITHUB_TOKEN` env var when run in GitHub Actions | yes, required for construction |
+| `logger` | - | The logger to use for logging. You can pass in your own logger or use the one this Gem auto-creates by default | no |
+
+It should be noted that you can configure the log level that is used through the `LOG_LEVEL` environment variable. The default log level is `INFO`.
+
 ### GitHub Actions
 
 If you are running in the context of a **pull request** or an **issue** in GitHub Actions, you can simply create a new instance of `Octokitted` and it will automatically hydrate itself:
