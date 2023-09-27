@@ -37,6 +37,10 @@ gem "octokitted", "~> X.X.X" # Replace X.X.X with the latest version
 
 ## Usage 💻
 
+This section goes over general usage of this Gem
+
+### GitHub Actions
+
 If you are running in the context of a **pull request** or an **issue** in GitHub Actions, you can simply create a new instance of `Octokitted` and it will automatically hydrate itself:
 
 ```ruby
@@ -72,6 +76,8 @@ puts gh.issue_number
 
 ```
 
+### Outside of GitHub Actions
+
 If you want to use Octokitted outside of GitHub Actions, you can pass some of the required information to the constructor:
 
 ```ruby
@@ -98,6 +104,56 @@ puts gh.issue_number
 
 # ...
 ```
+
+### Native Git Usage
+
+If you system / container has the `git` binary installed, you can also use this Gem to run native Git commands:
+
+```ruby
+# frozen_string_literal: true
+
+require "octokitted"
+
+# Setup a new instance of Octokitted with explicit values
+gh = Octokitted.new(
+    login: "GrantBirki", # The user associated with the GITHUB_TOKEN
+    org: "GrantBirki", # The organization associated with the repo
+    repo: "octokitted", # The repo name
+    token: ENV.fetch("GITHUB_TOKEN") # The GitHub token to use
+)
+
+# Check to see if there are any cloned repos
+puts gh.cloned_repos
+# => []
+
+# Clone the repo we setup our client with and get back a Git::Base object
+git = gh.clone
+
+# Check again to see that we have one locally cloned repo at the path displayed
+puts gh.cloned_repos
+# => ["./octokitted"]
+
+git.checkout("new_branch", new_branch: true, start_point: "main")
+
+git.add # git add -- "."
+# git.add(:all=>true) # git add --all -- "."
+# git.add("file_path") # git add -- "file_path"
+# git.add(["file_path_1", "file_path_2"])
+
+git.commit("message")
+# git.commit_all("message")
+
+git.push
+# git.push(git.remote("name"))
+
+# remove the repo we just cloned
+gh.remove_all_clones!
+
+puts gh.cloned_repos
+# => []
+```
+
+> Read more about the native Git Ruby Gem [here](https://github.com/ruby-git/ruby-git)
 
 ## Release 🚀
 
