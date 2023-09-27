@@ -40,7 +40,7 @@ class Octokitted
     @cloned_repos = []
     @event_path = event_path || ENV.fetch("GITHUB_EVENT_PATH", nil)
     @sha = ENV.fetch("GITHUB_SHA", nil)
-    org_and_repo_hash = fetch_org_and_repo
+    org_and_repo_hash = fetch_org_and_repo(org, repo)
     @login = login
     @org = org || org_and_repo_hash[:org]
     @repo = repo || org_and_repo_hash[:repo]
@@ -60,6 +60,15 @@ class Octokitted
     @log.debug("login: #{@octokit.login}")
     @log.debug("org: #{@org}")
     @log.debug("repo: #{@repo}")
+  end
+
+  # Setter method for the issue_number instance variable
+  # :param issue_number: The issue_number to set
+  # :return: it does not return as it is a setter method
+  Contract Numeric => Any
+  def issue_number=(issue_number)
+    @issue_number = issue_number
+    @log.debug("updated issue_number: #{@issue_number}")
   end
 
   # Setter method for the repo instance variable
@@ -137,8 +146,11 @@ class Octokitted
 
   # Fetch the org and repo from the environment
   # :return: A hash containing the org and repo, and the org and repo separately
-  Contract None => HashOf[Symbol, String]
-  def fetch_org_and_repo
+  Contract Maybe[String], Maybe[String] => Hash
+  def fetch_org_and_repo(org, repo)
+    # if org and repo are provided, and not nil, use them
+    return { org_and_repo: "#{org}/#{repo}", org:, repo: } if org && repo
+
     org_and_repo = ENV.fetch("GITHUB_REPOSITORY", nil)
     org = nil
     repo = nil
@@ -156,6 +168,10 @@ class Octokitted
   # :return: A Hash of the GitHub event data or nil if not found
   Contract Maybe[String] => Maybe[Hash]
   def fetch_github_event(event_path)
+    if ENV.fetch("GITHUB_ACTIONS", nil).nil?
+      @log.debug("Not running in GitHub Actions - GitHub Event data not auto-hydrated")
+      return nil
+    end
     unless event_path
       @log.warn("GITHUB_EVENT_PATH env var not found")
       return nil

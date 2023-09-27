@@ -27,6 +27,7 @@ describe Octokitted do
 
   context "#initialize" do
     it "ensures the class is initialized properly" do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with(event_path).and_return(default_event)
       expect(logger).to receive(:debug).with("Octokitted initialized")
       gh = Octokitted.new(logger:, login:, event_path:)
@@ -44,6 +45,7 @@ describe Octokitted do
     end
 
     it "sets up the class and builds a logger as well" do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with(event_path).and_return(default_event)
       allow(ENV).to receive(:fetch).with("LOG_LEVEL", "INFO").and_return("DEBUG")
       expect(Logger).to receive(:new).with($stdout, level: "DEBUG").and_return(logger)
@@ -53,6 +55,7 @@ describe Octokitted do
     end
 
     it "logs a warning if no github token is found" do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with(event_path).and_return(default_event)
       expect(ENV).to receive(:fetch).with("OCTOKIT_ACCESS_TOKEN", nil).and_return(nil)
       expect(ENV).to receive(:fetch).with("GITHUB_REPOSITORY", nil).and_return("github/octocat")
@@ -62,6 +65,7 @@ describe Octokitted do
     end
 
     it "sets up the class properly and does not auto-hydrate an issue_number due to a missing env var" do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(ENV).to receive(:fetch).with("GITHUB_EVENT_PATH", nil).and_return(nil)
       expect(logger).to receive(:warn).with("GITHUB_EVENT_PATH env var not found")
       gh = Octokitted.new(logger:, login:, event_path: nil)
@@ -69,20 +73,49 @@ describe Octokitted do
     end
 
     it "sets up the class properly and does not auto-hydrate an issue_number" do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with(event_path).and_return(commit_pushed_event)
       gh = Octokitted.new(logger:, login:, event_path:)
       expect(gh.instance_variable_get(:@issue_number)).to eq(nil)
     end
 
     it "sets up the class properly and does auto-hydrate an issue_number" do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with("pull_request_opened.json").and_return(pull_request_opened_event)
       gh = Octokitted.new(logger:, login:, event_path: "pull_request_opened.json")
       expect(gh.instance_variable_get(:@issue_number)).to eq(91)
+    end
+
+    it "sets up the class properly when not being run in GitHub Actions" do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return(nil)
+      expect(logger).to receive(:debug).with("Not running in GitHub Actions - GitHub Event data not auto-hydrated")
+      gh = Octokitted.new(logger:, login:, event_path: "pull_request_opened.json")
+      expect(gh.instance_variable_get(:@issue_number)).to eq(nil)
+    end
+  end
+
+  context "#issue_number" do
+    before(:each) do
+      expect(ENV).to receive(:fetch).with("GITHUB_EVENT_PATH", nil).and_return(nil)
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return(nil)
+    end
+
+    it "returns nil because the issue_number is not set" do
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.issue_number).to eq(nil)
+    end
+
+    it "sets the issue_number instance variable" do
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.issue_number).to eq(nil)
+      gh.issue_number = 123
+      expect(gh.issue_number).to eq(123)
     end
   end
 
   context "#repo=" do
     before(:each) do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with(event_path).and_return(default_event)
     end
 
@@ -105,6 +138,7 @@ describe Octokitted do
 
   context "#clone" do
     before(:each) do
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with(event_path).and_return(default_event)
     end
 
