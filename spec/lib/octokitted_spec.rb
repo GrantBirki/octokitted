@@ -94,6 +94,25 @@ describe Octokitted do
     end
   end
 
+  context "#issue_number" do
+    before(:each) do
+      expect(ENV).to receive(:fetch).with("GITHUB_EVENT_PATH", nil).and_return(nil)
+      expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return(nil)
+    end
+
+    it "returns nil because the issue_number is not set" do
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.issue_number).to eq(nil)
+    end
+
+    it "sets the issue_number instance variable" do
+      gh = Octokitted.new(logger:, login:)
+      expect(gh.issue_number).to eq(nil)
+      gh.issue_number = 123
+      expect(gh.issue_number).to eq(123)
+    end
+  end
+
   context "#repo=" do
     before(:each) do
       expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")

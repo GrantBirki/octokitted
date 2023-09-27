@@ -62,6 +62,15 @@ class Octokitted
     @log.debug("repo: #{@repo}")
   end
 
+  # Setter method for the issue_number instance variable
+  # :param issue_number: The issue_number to set
+  # :return: it does not return as it is a setter method
+  Contract Numeric => Any
+  def issue_number=(issue_number)
+    @issue_number = issue_number
+    @log.debug("updated issue_number: #{@issue_number}")
+  end
+
   # Setter method for the repo instance variable
   # :param repo: The repo to set
   # :return: it does not return as it is a setter method
