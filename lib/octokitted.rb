@@ -159,6 +159,10 @@ class Octokitted
   # :return: A Hash of the GitHub event data or nil if not found
   Contract Maybe[String] => Maybe[Hash]
   def fetch_github_event(event_path)
+    if ENV.fetch("GITHUB_ACTIONS", nil).nil?
+      @log.debug("Not running in GitHub Actions - GitHub Event data not auto-hydrated")
+      return nil
+    end
     unless event_path
       @log.warn("GITHUB_EVENT_PATH env var not found")
       return nil
