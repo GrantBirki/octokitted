@@ -34,3 +34,15 @@ source "https://rubygems.org"
 gem "octokit", "~> 7.1" # a dependency of octokitted
 gem "octokitted", "~> X.X.X" # Replace X.X.X with the latest version
 ```
+
+## Usage 💻
+
+```ruby
+# frozen_string_literal: true
+
+require "octokitted"
+```
+
+## Release 🚀
+
+To release a new version of this gem, simply edit the [`lib/version.rb`](lib/version.rb) in this repo. When you commit your changes to `main`, a new version will be automatically released via GitHub Actions to RubyGems and GitHub Packages.
