@@ -43,8 +43,8 @@ class Issue
   # Adds a comment to an issue or pull request
   # :param comment: The comment to add to the issue (String)
   # :param issue_number: The issue number to add the comment to
-  Contract KeywordArgs[comment: String, issue_number: Maybe[Numeric]] => Any
-  def add_comment(comment:, issue_number: nil)
+  Contract String, KeywordArgs[issue_number: Maybe[Numeric]] => Any
+  def add_comment(comment, issue_number: nil)
     issue_number = construct_issue_numer(issue_number)
     @log.debug("adding comment: #{comment} to issue: #{issue_number}")
 
