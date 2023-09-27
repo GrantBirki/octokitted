@@ -52,7 +52,7 @@ describe Issue do
       expect(octokit).to receive(:add_comment).with(org_and_repo, 1, "foo").and_return(nil)
       expect(logger).to receive(:debug).with("adding comment: foo to issue: 1")
       issue = Issue.new(octokitted)
-      issue.add_comment(comment: "foo")
+      issue.add_comment("foo")
     end
   end
 
