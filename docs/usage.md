@@ -120,3 +120,49 @@ gh.remove_all_clones!
 puts gh.cloned_repos
 # => []
 ```
+
+## Common Methods
+
+Common methods are "helper" methods that leverage `Octokitted`'s self-hydrating nature to do common tasks that you would with `Octokit` but with less code or explict options.
+
+### Issue
+
+The `Issue` class is a helper class that is used to interact with GitHub issues.
+
+Any method where `issue_number: nil` is an option will default to the `gh.issue_number` instance variable if no value is provided. If running in the proper GitHub Action context, this variable will be hydrated automatically!
+
+#### `gh.add_labels(labels:, issue_number: nil)` (class method)
+
+Adds the provided Array of labels to the issue.
+
+```ruby
+gh.issue.add_labels(labels: ["bug", "enhancement"])
+```
+
+#### `gh.remove_labels(labels:, issue_number: nil)` (class method)
+
+Removes the provided Array of labels from the issue.
+
+```ruby
+gh.issue.remove_labels(labels: ["bug", "enhancement"])
+```
+
+> Note: If a label is not present on the issue, it will be ignored. This is to prevent errors from being thrown and to keep the method idempotent. It is a delight!
+
+#### `gh.add_comment(comment, issue_number: nil)` (class method)
+
+Adds the provided comment to the issue. Where `comment` is the comment body to add
+
+```ruby
+gh.issue.add_comment("Hello from Octokitted!")
+```
+
+#### `gh.close(issue_number: nil, options: {})` (class method)
+
+Closes the issue that is loaded into the `gh` instance's context
+
+```ruby
+gh.issue.close
+```
+
+> By default, the issue will be "closed as completed" or the purple color for a lack of better words
