@@ -39,6 +39,8 @@ gem "octokitted", "~> X.X.X" # Replace X.X.X with the latest version
 
 This section goes over general usage of this Gem
 
+For full usage documentation of available methods, please see the [docs](./docs/usage.md)
+
 ### Configuration
 
 The following table goes into detail about the configuration options that can be passed into the `Octokitted.new()` constructor:
