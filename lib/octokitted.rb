@@ -40,7 +40,7 @@ class Octokitted
     @cloned_repos = []
     @event_path = event_path || ENV.fetch("GITHUB_EVENT_PATH", nil)
     @sha = ENV.fetch("GITHUB_SHA", nil)
-    org_and_repo_hash = fetch_org_and_repo
+    org_and_repo_hash = fetch_org_and_repo(org, repo)
     @login = login
     @org = org || org_and_repo_hash[:org]
     @repo = repo || org_and_repo_hash[:repo]
@@ -137,8 +137,11 @@ class Octokitted
 
   # Fetch the org and repo from the environment
   # :return: A hash containing the org and repo, and the org and repo separately
-  Contract None => HashOf[Symbol, String]
-  def fetch_org_and_repo
+  Contract Maybe[String], Maybe[String] => Hash
+  def fetch_org_and_repo(org, repo)
+    # if org and repo are provided, and not nil, use them
+    return { org_and_repo: "#{org}/#{repo}", org:, repo: } if org && repo
+
     org_and_repo = ENV.fetch("GITHUB_REPOSITORY", nil)
     org = nil
     repo = nil
