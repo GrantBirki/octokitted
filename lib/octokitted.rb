@@ -193,6 +193,11 @@ class Octokitted
 
     issue_number = (github_event[:issue] || github_event[:pull_request] || github_event)[:number]
 
+    if issue_number.nil?
+      @log.debug("issue_number not found in GitHub event data - issue_number not auto-hydrated")
+      return nil
+    end
+
     @log.info("issue_number auto-hydrated - issue_number: #{issue_number}")
     return issue_number
   end
