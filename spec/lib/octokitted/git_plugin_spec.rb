@@ -50,8 +50,10 @@ describe GitPlugin do
     end
 
     it "successfully clones a repo" do
+      empty_logger = Logger.new(nil)
+      expect(Logger).to receive(:new).with(nil).and_return(empty_logger)
       expect(Git).to receive(:clone)
-        .with(git_path, "octoawesome", path: ".", log: logger, **{})
+        .with(git_path, "octoawesome", path: ".", log: empty_logger, **{})
         .and_return(git)
 
       gh = GitPlugin.new(logger:, login:, token:)
@@ -59,8 +61,10 @@ describe GitPlugin do
     end
 
     it "raises an error when trying to clone a repo" do
+      empty_logger = Logger.new(nil)
+      expect(Logger).to receive(:new).with(nil).and_return(empty_logger)
       expect(Git).to receive(:clone)
-        .with(git_path, "octoawesome", path: ".", log: logger, **{})
+        .with(git_path, "octoawesome", path: ".", log: empty_logger, **{})
         .and_raise(StandardError, "there is something wrong with your token - #{token}")
 
       expect(logger).to receive(:debug).with("cloning octocat/octoawesome")
