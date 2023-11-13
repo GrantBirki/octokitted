@@ -2,6 +2,7 @@
 
 require "git"
 require "contracts"
+require "logger"
 
 class GitPlugin
   attr_reader :login
@@ -47,7 +48,13 @@ class GitPlugin
   Contract KeywordArgs[org: String, repo: String, path: Maybe[String], options: Maybe[Hash]] => Hash
   def clone(org:, repo:, path: ".", options: {})
     @log.debug("cloning #{org}/#{repo}")
-    git_object = Git.clone("https://#{@token}@github.com/#{org}/#{repo}.git", repo, path:, log: @log, **options)
+    git_object = Git.clone(
+      "https://#{@token}@github.com/#{org}/#{repo}.git",
+      repo,
+      path:,
+      log: Logger.new(nil),
+      **options
+    )
 
     # configure the git environment
     git_object.config("user.name", @login)
