@@ -3,13 +3,13 @@
 source "https://rubygems.org"
 
 gem "contracts", "~> 0.17"
-gem "faraday", "~> 2.7", ">= 2.7.11"
+gem "faraday", "~> 2.7"
 gem "faraday-retry", "~> 2.2"
 gem "git", "~> 1.18"
-gem "octokit", "~> 7.1"
+gem "octokit", "~> 8.0"
 
 group :development do
-  gem "irb", "~> 1.8"
+  gem "irb", "~> 1.9"
   gem "rspec", "~> 3.12"
   gem "rubocop", "~> 1.56"
   gem "rubocop-github", "~> 0.20"
