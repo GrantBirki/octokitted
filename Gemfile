@@ -9,7 +9,7 @@ gem "git", "~> 1.18"
 gem "octokit", "~> 7.1"
 
 group :development do
-  gem "irb", "~> 1.8"
+  gem "irb", "~> 1.9"
   gem "rspec", "~> 3.12"
   gem "rubocop", "~> 1.56"
   gem "rubocop-github", "~> 0.20"
