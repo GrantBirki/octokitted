@@ -3,7 +3,7 @@
 source "https://rubygems.org"
 
 gem "contracts", "~> 0.17"
-gem "faraday", "~> 2.7", ">= 2.7.11"
+gem "faraday", "~> 2.7"
 gem "faraday-retry", "~> 2.2"
 gem "git", "~> 1.18"
 gem "octokit", "~> 7.1"
