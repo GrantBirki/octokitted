@@ -48,7 +48,7 @@ describe Octokitted do
       expect(ENV).to receive(:fetch).with("GITHUB_ACTIONS", nil).and_return("true")
       expect(File).to receive(:read).with(event_path).and_return(default_event)
       allow(ENV).to receive(:fetch).with("LOG_LEVEL", "INFO").and_return("DEBUG")
-      expect(Logger).to receive(:new).with($stdout, level: "DEBUG").and_return(logger)
+      expect(Logger).to receive(:new).with($stdout, level: "DEBUG", redact_patterns: []).and_return(logger)
       expect(logger).to receive(:debug).with("Octokitted initialized")
       expect(logger).to receive(:debug).with("login: hubot")
       Octokitted.new(logger: nil, login:, event_path:)

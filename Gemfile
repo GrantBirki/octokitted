@@ -8,6 +8,10 @@ gem "faraday-retry", "~> 2.2"
 gem "git", "~> 1.18"
 gem "octokit", "~> 8.0"
 
+source "https://rubygems.pkg.github.com/github" do
+  gem "redacting-logger", "~> 1.0"
+end
+
 group :development do
   gem "irb", "~> 1.9"
   gem "rspec", "~> 3.12"
