@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday-retry", "~> 2.2"
   spec.add_dependency "git", "~> 1.18"
   spec.add_dependency "octokit", ">= 7.1", "< 9.0"
+  spec.add_dependency "redacting-logger", "~> 1.0"
 
   spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
 
