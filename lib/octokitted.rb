@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "octokit"
-require "logger"
+require "redacting_logger"
 require "contracts"
 
 require_relative "octokitted/git_plugin"
@@ -141,7 +141,11 @@ class Octokitted
   # construct a logger for the class
   def setup_logger
     $stdout.sync = true # don't buffer - flush immediately
-    Logger.new($stdout, level: ENV.fetch("LOG_LEVEL", "INFO").upcase)
+    RedactingLogger.new(
+      $stdout,
+      level: ENV.fetch("LOG_LEVEL", "INFO").upcase,
+      redact_patterns: [] # just using the defaults for now
+    )
   end
 
   # Fetch the org and repo from the environment
