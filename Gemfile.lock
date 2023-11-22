@@ -60,6 +60,8 @@ GEM
     rchardet (1.8.0)
     rdoc (6.6.0)
       psych (>= 4.0.0)
+    redacting-logger (1.0.0)
+      logger (~> 1.6)
     regexp_parser (2.8.2)
     reline (0.4.0)
       io-console (~> 0.5)
@@ -127,12 +129,6 @@ GEM
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
 
-GEM
-  remote: https://rubygems.pkg.github.com/github/
-  specs:
-    redacting-logger (1.0.0)
-      logger (~> 1.6)
-
 PLATFORMS
   arm64-darwin-21
   darwin
@@ -146,7 +142,7 @@ DEPENDENCIES
   git (~> 1.18)
   irb (~> 1.9)
   octokit (~> 8.0)
-  redacting-logger (~> 1.0)!
+  redacting-logger (~> 1.0)
   rspec (~> 3.12)
   rubocop (~> 1.56)
   rubocop-github (~> 0.20)
