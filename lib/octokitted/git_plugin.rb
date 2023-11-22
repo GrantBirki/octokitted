@@ -52,7 +52,7 @@ class GitPlugin
       "https://#{@token}@github.com/#{org}/#{repo}.git",
       repo,
       path:,
-      log: Logger.new(nil),
+      log: @log,
       **options
     )
 
