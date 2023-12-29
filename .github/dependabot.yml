@@ -9,9 +9,7 @@ updates:
         patterns:
           - "*"
     schedule:
-      interval: weekly
-      day: "tuesday"
-      time: "21:00"
+      interval: monthly
   - package-ecosystem: github-actions
     directory: "/"
     groups:
@@ -19,6 +17,4 @@ updates:
         patterns:
           - "*"
     schedule:
-      interval: weekly
-      day: "tuesday"
-      time: "21:00"
+      interval: monthly
