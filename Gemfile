@@ -18,4 +18,5 @@ group :development do
   gem "rubocop-rspec", "~> 2.24"
   gem "simplecov", "~> 0.22"
   gem "simplecov-erb", "~> 1.0"
+  gem "ruby-lsp", "~> 0.13.2"
 end
