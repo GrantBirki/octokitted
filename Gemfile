@@ -3,20 +3,20 @@
 source "https://rubygems.org"
 
 gem "contracts", "~> 0.17"
-gem "faraday", "~> 2.8"
+gem "faraday", "~> 2.9"
 gem "faraday-retry", "~> 2.2"
-gem "git", "~> 1.18"
+gem "git", "~> 1.19"
 gem "octokit", "~> 8.0"
 gem "redacting-logger", "~> 1.1"
 
 group :development do
   gem "irb", "~> 1.11"
   gem "rspec", "~> 3.12"
-  gem "rubocop", "~> 1.59"
+  gem "rubocop", "~> 1.60"
   gem "rubocop-github", "~> 0.20"
   gem "rubocop-performance", "~> 1.20"
-  gem "rubocop-rspec", "~> 2.24"
-  gem "ruby-lsp", "~> 0.13.2"
+  gem "rubocop-rspec", "~> 2.26"
+  gem "ruby-lsp", "~> 0.13.4"
   gem "simplecov", "~> 0.22"
   gem "simplecov-erb", "~> 1.0"
 end
