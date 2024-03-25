@@ -10,9 +10,9 @@ gem "octokit", "~> 8.0"
 gem "redacting-logger", "~> 1.2"
 
 group :development do
-  gem "irb", "~> 1.11"
+  gem "irb", "~> 1.12"
   gem "rspec", "~> 3.12"
-  gem "rubocop", "~> 1.61"
+  gem "rubocop", "~> 1.62"
   gem "rubocop-github", "~> 0.20"
   gem "rubocop-performance", "~> 1.20"
   gem "rubocop-rspec", "~> 2.27"
