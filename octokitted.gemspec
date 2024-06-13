@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "contracts", "~> 0.17"
   spec.add_dependency "faraday-retry", "~> 2.2"
-  spec.add_dependency "git", "~> 1.18"
+  spec.add_dependency "git", ">= 1.18", "< 3.0"
   spec.add_dependency "octokit", ">= 7.1", "< 9.0"
   spec.add_dependency "redacting-logger", "~> 1.0"
 
