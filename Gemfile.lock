@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    octokitted (1.2.5)
+    octokitted (1.2.6)
       contracts (~> 0.17)
       faraday-retry (~> 2.2)
       git (>= 1.18, < 3.0)

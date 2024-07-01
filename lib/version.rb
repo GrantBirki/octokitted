@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-module Octokitted
-  module Version
-    VERSION = "1.2.5"
-  end
+module Version
+  VERSION = "1.2.6"
 end
