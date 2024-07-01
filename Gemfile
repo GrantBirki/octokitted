@@ -2,12 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "contracts", "~> 0.17"
-gem "faraday", "~> 2.9"
-gem "faraday-retry", "~> 2.2"
-gem "git", "~> 2.1"
-gem "octokit", "~> 9.1"
-gem "redacting-logger", "~> 1.3"
+gemspec
 
 group :development do
   gem "irb", "~> 1.13"
