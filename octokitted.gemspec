@@ -4,7 +4,7 @@ require_relative "lib/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "octokitted"
-  spec.version       = Octokitted::Version::VERSION
+  spec.version       = Version::VERSION
   spec.authors       = ["Grant Birkinbine"]
   spec.email         = "grant.birkinbine@gmail.com"
   spec.license       = "MIT"
