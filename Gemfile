@@ -5,9 +5,9 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
-  gem "irb", "~> 1.13"
+  gem "irb", "~> 1.14"
   gem "rspec", "~> 3.12"
-  gem "rubocop", "~> 1.64"
+  gem "rubocop", "~> 1.65"
   gem "rubocop-github", "~> 0.20"
   gem "rubocop-performance", "~> 1.21"
   gem "rubocop-rspec", "~> 3.0"
