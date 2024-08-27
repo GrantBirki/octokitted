@@ -31,7 +31,6 @@ Via a Gemfile:
 
 source "https://rubygems.org"
 
-gem "octokit", "~> 7.1" # a dependency of octokitted
 gem "octokitted", "~> X.X.X" # Replace X.X.X with the latest version
 ```
 
