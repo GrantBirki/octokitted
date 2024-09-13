@@ -79,7 +79,7 @@ puts gh.issue_number
 # => 123
 
 # add a comment to the issue in the context we are running in
-gh.issue.add_comment(comment: "Hello from Octokitted!")
+gh.issue.add_comment("Hello from Octokitted!")
 
 # add a label to the issue
 gh.issue.add_labels(labels: ["test"])
